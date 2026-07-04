@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using myshop.DataAccess;
-using myshop.Entities.Models;
+using myshop.DataAccess.Context;
 using myshop.Entities.ViewModels;
+using MyShop.Domain.Models;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
@@ -58,7 +57,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(ProductVM productVM,IFormFile file)
+        public IActionResult Create(ProductVM productVM, IFormFile file)
         {
             if (ModelState.IsValid)
             {
@@ -69,7 +68,7 @@ namespace myshop.Web.Areas.Admin.Controllers
                     var Upload = Path.Combine(RootPath, @"Images\Products");
                     var ext = Path.GetExtension(file.FileName);
 
-                    using (var filestream = new FileStream(Path.Combine(Upload,filename+ext),FileMode.Create))
+                    using (var filestream = new FileStream(Path.Combine(Upload, filename + ext), FileMode.Create))
                     {
                         file.CopyTo(filestream);
                     }
@@ -103,7 +102,7 @@ namespace myshop.Web.Areas.Admin.Controllers
 
             return View(productVM);
         }
-        
+
         [HttpPost]
         public IActionResult Edit(ProductVM productVM, IFormFile? file)
         {
@@ -144,7 +143,7 @@ namespace myshop.Web.Areas.Admin.Controllers
 
             return View(productVM.Product);
         }
-        
+
         [HttpDelete]
         public IActionResult Delete(int? id)
         {

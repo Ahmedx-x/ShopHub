@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using myshop.DataAccess;
-using myshop.Entities.Models;
+using myshop.DataAccess.Context;
+using MyShop.Domain.Models;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
