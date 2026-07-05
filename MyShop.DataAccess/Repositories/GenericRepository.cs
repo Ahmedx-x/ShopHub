@@ -1,0 +1,69 @@
+﻿using Microsoft.EntityFrameworkCore;
+using myshop.DataAccess.Context;
+using MyShop.Domain.Interfaces;
+using MyShop.Domain.Models;
+using System.Linq.Expressions;
+
+namespace MyShop.DataAccess.Repositories
+{
+    public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly DbSet<T> _dbSet;
+
+        public GenericRepository(ApplicationDbContext context)
+        {
+            _context = context;
+            _dbSet = context.Set<T>();
+        }
+
+        public async Task<T?> GetByIdAsync(int id)
+        {
+            return await _dbSet.FindAsync(new object[] { id });
+        }
+
+        public async Task<IReadOnlyList<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null)
+        {
+            IQueryable<T> query = _dbSet.AsNoTracking();
+
+            if (predicate != null)
+                query.Where(predicate);
+
+            return await query.ToListAsync();
+        }
+
+        public async Task AddAsync(T entity)
+        {
+            await _dbSet.AddAsync(entity);
+        }
+
+        public Task DeleteAsync(T entity)
+        {
+            _dbSet.Remove(entity);
+            return Task.CompletedTask;
+        }
+
+        public async Task DeleteByIdAsync(int id)
+        {
+            var entity = await GetByIdAsync(id);
+            if (entity != null)
+                _dbSet.Remove(entity);
+        }
+
+        public Task UpdateAsync(T entity)
+        {
+            _dbSet.Update(entity);
+            return Task.CompletedTask;
+        }
+
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbSet.AnyAsync(predicate);
+        }
+
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
+        {
+            return predicate == null ? await _dbSet.CountAsync() : await _dbSet.CountAsync(predicate);
+        }
+    }
+}

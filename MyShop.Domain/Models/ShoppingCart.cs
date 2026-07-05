@@ -3,10 +3,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MyShop.Domain.Models
 {
-    public class ShoppingCart
+    public class ShoppingCart : BaseEntity
     {
-        public int Id { get; set; }
-
         public int ProductId { get; set; }
 
         [ForeignKey("ProductId")]

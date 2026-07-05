@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using myshop.DataAccess.Context;
+using MyShop.DataAccess;
+using MyShop.DataAccess.Repositories;
+using MyShop.Domain.Interfaces;
 using MyShop.Domain.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +20,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
     ).AddDefaultTokenProviders().AddDefaultUI()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+//builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddHttpContextAccessor();
 

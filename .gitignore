@@ -1,3 +1,9 @@
+# Visual Studio
 .vs/
+
+# Build output
+bin/
+obj/
+
+# Configuration
 myshop.Web/appsettings.json
-myshop.Web/bin/Debug/net7.0/appsettings.json

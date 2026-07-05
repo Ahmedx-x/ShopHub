@@ -2,10 +2,8 @@
 
 namespace MyShop.Domain.Models
 {
-    public class OrderHeader
+    public class OrderHeader : BaseEntity
     {
-        public int Id { get; set; }
-
         public string ApplicationUserId { get; set; }
 
         [ValidateNever]

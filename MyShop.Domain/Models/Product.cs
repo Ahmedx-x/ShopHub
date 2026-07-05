@@ -4,17 +4,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MyShop.Domain.Models
 {
-    public class Product
+    public class Product : BaseEntity
     {
-        public int Id { get; set; }
-
         [Required]
-        public string Name { get; set; }
-        public string Description { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; } = null!;
 
         [DisplayName("Image")]
         [ValidateNever]
-        public string Img { get; set; }
+        public string Img { get; set; } = null!;
 
         [Required]
         public decimal Price { get; set; }
@@ -23,6 +21,6 @@ namespace MyShop.Domain.Models
         [DisplayName("Category")]
         public int CategoryId { get; set; }
         [ValidateNever]
-        public Category Category { get; set; }
+        public Category Category { get; set; } = null!;
     }
 }
