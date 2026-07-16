@@ -22,12 +22,46 @@ namespace MyShop.DataAccess.Repositories
             return await _dbSet.FindAsync(new object[] { id });
         }
 
-        public async Task<IReadOnlyList<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null)
+        public async Task<T?> FindAsync(
+            Expression<Func<T, bool>>? predicate = null,
+            bool isTracked = true,
+            string? include = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (!isTracked)
+                query = query.AsNoTracking();
+
+            if (predicate != null)
+                query = query.Where(predicate);
+
+            if (include != null)
+            {
+                foreach (var includeProp in include.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<IReadOnlyList<T>> GetAllAsync(
+            Expression<Func<T, bool>>? predicate = null,
+            string? include = null)
         {
             IQueryable<T> query = _dbSet.AsNoTracking();
 
             if (predicate != null)
-                query.Where(predicate);
+                query = query.Where(predicate);
+
+            if (include != null)
+            {
+                foreach (var includeProp in include.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
 
             return await query.ToListAsync();
         }

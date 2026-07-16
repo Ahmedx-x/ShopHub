@@ -5,6 +5,7 @@ using MyShop.DataAccess;
 using MyShop.DataAccess.Repositories;
 using MyShop.Domain.Interfaces;
 using MyShop.Domain.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,8 +23,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-//builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 builder.Services.AddHttpContextAccessor();
 
