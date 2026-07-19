@@ -1,4 +1,4 @@
-﻿using myshop.DataAccess.Context;
+﻿using MyShop.DataAccess.Context;
 using MyShop.Domain.Interfaces;
 using MyShop.Domain.Models;
 

@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using myshop.DataAccess.Context;
+using MyShop.Business.Interfaces;
+using MyShop.Business.Services;
 using MyShop.DataAccess;
+using MyShop.DataAccess.Context;
 using MyShop.DataAccess.Repositories;
+using MyShop.DataAccess.Seed;
 using MyShop.Domain.Interfaces;
 using MyShop.Domain.Models;
 using System.Reflection;
@@ -16,14 +19,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
     builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
-    options => options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(4)
-    ).AddDefaultTokenProviders().AddDefaultUI()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromDays(4);
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddDefaultTokenProviders()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 builder.Services.AddHttpContextAccessor();
@@ -35,12 +42,12 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    await db.Database.MigrateAsync();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+    await DbInitializer.SeedRolesAsync(roleManager);
 }
-
-
-
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
