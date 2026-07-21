@@ -1,26 +1,38 @@
-﻿@if(TempData["Create"] != null)
-{  
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-    <script>
-    toastr.success("@TempData["Create"]")
-    </script>
+﻿@{
+    bool hasAnyToast = TempData["Create"] != null
+        || TempData["Update"] != null
+        || TempData["Delete"] != null
+        || TempData["Success"] != null
+        || TempData["Error"] != null;
 }
 
-@if (TempData["Update"] != null)
+@if (hasAnyToast)
 {
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-    <script>
-        toastr.info("@TempData["Update"]")
-    </script>
-}
 
-@if (TempData["Delete"] != null)
-{
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-    <script>
-        toastr.error("@TempData["Delete"]")
-    </script>
+    @if (TempData["Create"] != null)
+    {
+        <script>toastr.success("@Html.Raw(Json.Serialize(TempData["Create"]))")</script>
+    }
+
+    @if (TempData["Update"] != null)
+    {
+        <script>toastr.info("@Html.Raw(Json.Serialize(TempData["Update"]))")</script>
+    }
+
+    @if (TempData["Delete"] != null)
+    {
+        <script>toastr.warning("@Html.Raw(Json.Serialize(TempData["Delete"]))")</script>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <script>toastr.success("@Html.Raw(Json.Serialize(TempData["Success"]))")</script>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <script>toastr.error("@Html.Raw(Json.Serialize(TempData["Error"]))")</script>
+    }
 }

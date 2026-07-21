@@ -27,7 +27,7 @@ namespace MyShop.Web.Controllers
         public async Task<IActionResult> PromoteToAdmin(string userId)
         {
             await _userService.CustomerToAdmin(userId);
-            TempData["Success"] = "User promoted to Admin.";
+            TempData["Update"] = "User promoted to Admin.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -36,7 +36,7 @@ namespace MyShop.Web.Controllers
         public async Task<IActionResult> DemoteToCustomer(string userId)
         {
             await _userService.AdminToCustomer(userId);
-            TempData["Success"] = "User demoted to Customer.";
+            TempData["Update"] = "User demoted to Customer.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -45,7 +45,7 @@ namespace MyShop.Web.Controllers
         public async Task<IActionResult> LockAccount(string userId)
         {
             await _userService.LockUserAccount(userId);
-            TempData["Success"] = "User account locked.";
+            TempData["Update"] = "User account locked.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -54,7 +54,7 @@ namespace MyShop.Web.Controllers
         public async Task<IActionResult> UnLockAccount(string userId)
         {
             await _userService.UnLockUserAccount(userId);
-            TempData["Success"] = "User account unlocked.";
+            TempData["Update"] = "User account unlocked.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -63,7 +63,7 @@ namespace MyShop.Web.Controllers
         public async Task<IActionResult> DeleteUser(string userId)
         {
             await _userService.DeleteAccount(userId);
-            TempData["Success"] = "User account deleted.";
+            TempData["Delete"] = "User account deleted.";
             return RedirectToAction(nameof(Index));
         }
 

@@ -5,8 +5,6 @@ using MyShop.Domain.Models;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "Admin")]
-    [Route("[controller]/[action]")]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -23,12 +21,14 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(Category category)
         {
             if (ModelState.IsValid)
@@ -42,6 +42,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             if (id == 0)
@@ -52,6 +53,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(Category category)
         {
             if (ModelState.IsValid)
@@ -66,6 +68,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             if (id == 0)
@@ -77,6 +80,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             var categoryIndb = await _unitOfWork.Categories.GetByIdAsync(id);

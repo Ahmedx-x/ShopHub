@@ -8,8 +8,6 @@ using MyShop.Domain.Models;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
-    [Authorize(Roles = "Admin")]
-    [Route("[controller]/[action]")]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -40,6 +38,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create()
         {
             var catigories = await _unitOfWork.Categories.GetAllAsync();
@@ -54,6 +53,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(ProductVM productVM, IFormFile file)
         {
             if (ModelState.IsValid)
@@ -81,6 +81,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id)
         {
             if (id == 0)
@@ -103,6 +104,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(ProductVM productVM, IFormFile? file)
         {
             if (ModelState.IsValid)
@@ -144,6 +146,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var productIndb = await _unitOfWork.Products.GetByIdAsync(id);

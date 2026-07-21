@@ -76,5 +76,20 @@ namespace MyShop.Web.Controllers
 
             return View(dto);
         }
+
+        [HttpGet]
+        public IActionResult AccessDenied(string? returnUrl)
+        {
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                var segments = returnUrl.Trim('/').Split('/');
+                var controller = segments.Length > 0 ? segments[0] : "Home";
+
+                TempData["Error"] = "You don't have permission to do that.";
+                return RedirectToAction("Index", controller);
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
     }
 }
