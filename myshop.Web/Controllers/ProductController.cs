@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using myshop.Entities.ViewModels;
 using MyShop.Business.DTOs;
@@ -7,6 +8,8 @@ using MyShop.Domain.Models;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
+    [Route("[controller]/[action]")]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

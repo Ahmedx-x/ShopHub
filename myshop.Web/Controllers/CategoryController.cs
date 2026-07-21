@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MyShop.Domain.Interfaces;
 using MyShop.Domain.Models;
 
 namespace myshop.Web.Areas.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
+    [Route("[controller]/[action]")]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
