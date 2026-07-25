@@ -106,6 +106,7 @@
     <Folder Include="Views\Shared\Components\" />
     <Folder Include="wwwroot\Images\Products\" />
     <Folder Include="wwwroot\NewFolder\" />
+    <Folder Include="wwwroot\uploads\products\" />
   </ItemGroup>
 
   <ItemGroup>

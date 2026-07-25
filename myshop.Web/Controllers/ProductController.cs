@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using myshop.Entities.ViewModels;
 using MyShop.Business.DTOs;
+using MyShop.Business.Interfaces;
 using MyShop.Domain.Interfaces;
 using MyShop.Domain.Models;
 
@@ -11,16 +12,16 @@ namespace myshop.Web.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IFileService _fileService;
         private readonly IMapper _mapper;
 
         public ProductController(
             IUnitOfWork unitOfWork,
-            IWebHostEnvironment webHostEnvironment,
+            IFileService fileService,
             IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _webHostEnvironment = webHostEnvironment;
+            _fileService = fileService;
             _mapper = mapper;
         }
 
@@ -58,23 +59,17 @@ namespace myshop.Web.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                string RootPath = _webHostEnvironment.WebRootPath;
                 if (file != null)
                 {
-                    string filename = Guid.NewGuid().ToString();
-                    var Upload = Path.Combine(RootPath, @"Images\Products");
-                    var ext = Path.GetExtension(file.FileName);
-
-                    using (var filestream = new FileStream(Path.Combine(Upload, filename + ext), FileMode.Create))
-                    {
-                        file.CopyTo(filestream);
-                    }
-                    productVM.Product.Img = @"Images\Products\" + filename + ext;
+                    var imagePath = await _fileService.UploadAsync(file);
+                    productVM.Product.Img = imagePath;
                 }
 
                 await _unitOfWork.Products.AddAsync(productVM.Product);
                 await _unitOfWork.SaveChangesAsync();
+
                 TempData["Create"] = "Item has Created Successfully";
+
                 return RedirectToAction("Index");
             }
             return View(productVM.Product);
@@ -109,36 +104,24 @@ namespace myshop.Web.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                string RootPath = _webHostEnvironment.WebRootPath;
-
                 if (file != null)
                 {
-                    string filename = Guid.NewGuid().ToString();
-                    var Upload = Path.Combine(RootPath, @"Images\Products");
-                    var ext = Path.GetExtension(file.FileName);
+                    var oldImagePath = productVM.Product.Img;
 
-                    if (productVM.Product.Img != null)
-                    {
-                        var oldimg = Path.Combine(RootPath, productVM.Product.Img.TrimStart('\\'));
+                    var imagePath = await _fileService.UploadAsync(file);
 
-                        if (System.IO.File.Exists(oldimg))
-                        {
-                            System.IO.File.Delete(oldimg);
-                        }
-                    }
+                    productVM.Product.Img = imagePath;
 
-                    using (var filestream = new FileStream(Path.Combine(Upload, filename + ext), FileMode.Create))
-                    {
-                        file.CopyTo(filestream);
-                    }
-
-                    productVM.Product.Img = @"Images\Products\" + filename + ext;
+                    //the delete operation should be after ensuring that file uploaded successfully
+                    if (oldImagePath != null)
+                        await _fileService.DeleteAsync(oldImagePath);
                 }
 
                 await _unitOfWork.Products.UpdateAsync(productVM.Product);
                 await _unitOfWork.SaveChangesAsync();
 
                 TempData["Update"] = "Data has Updated Successfully";
+
                 return RedirectToAction("Index");
             }
 
@@ -154,15 +137,9 @@ namespace myshop.Web.Areas.Admin.Controllers
             if (productIndb == null)
                 return Json(new { success = false, message = "Error while Deleting" });
 
+            await _fileService.DeleteAsync(productIndb.Img);
+
             await _unitOfWork.Products.DeleteAsync(productIndb);
-
-            var oldimg = Path.Combine(_webHostEnvironment.WebRootPath, productIndb.Img.TrimStart('\\'));
-
-            if (System.IO.File.Exists(oldimg))
-            {
-                System.IO.File.Delete(oldimg);
-            }
-
             await _unitOfWork.SaveChangesAsync();
 
             return Json(new { success = true, message = "file has been Deleted" });
