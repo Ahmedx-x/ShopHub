@@ -1,12 +1,15 @@
-﻿using System.Linq.Expressions;
+﻿using MyShop.Domain.Models;
+using System.Linq.Expressions;
 
 namespace MyShop.Domain.Interfaces
 {
     public interface IGenericRepository<T>
     {
-        Task<IReadOnlyList<T>> GetAllAsync(
+        Task<Pagination<T>> GetAllAsync(
             Expression<Func<T, bool>>? predicate = null,
-            string? include = null);
+            string? include = null,
+            int pageSize = 0,
+            int pageNumber = 1);
         Task<T?> GetByIdAsync(int id);
         Task<T?> FindAsync(
             Expression<Func<T, bool>>? predicate = null,

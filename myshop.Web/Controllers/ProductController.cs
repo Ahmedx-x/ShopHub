@@ -31,11 +31,22 @@ namespace myshop.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetData()
+        public async Task<IActionResult> GetData(string? searchTerm, int pageSize = 10, int pageNumber = 1)
         {
-            var products = await _unitOfWork.Products.GetAllAsync(include: "Category");
-            var productsDto = _mapper.Map<IReadOnlyList<ProductDto>>(products);
-            return Json(new { data = productsDto });
+            Pagination<Product> result;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+                result = await _unitOfWork.Products.SearchAsync(searchTerm, pageSize, pageNumber);
+
+            else
+                result = await _unitOfWork.Products
+                    .GetAllAsync(include: "Category", pageSize: pageSize, pageNumber: pageNumber);
+
+            var productsDto = _mapper.Map<IReadOnlyList<ProductDto>>(result.Items);
+            return Json(new
+            {
+                data = productsDto,
+            });
         }
 
         [HttpGet]
@@ -43,7 +54,7 @@ namespace myshop.Web.Areas.Admin.Controllers
         public async Task<IActionResult> Create()
         {
             var catigories = await _unitOfWork.Categories.GetAllAsync();
-            var list = _mapper.Map<IEnumerable<CategoryDto>>(catigories);
+            var list = _mapper.Map<IEnumerable<CategoryDto>>(catigories.Items);
 
             ProductVM productVM = new ProductVM
             {

@@ -46,9 +46,11 @@ namespace MyShop.DataAccess.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<IReadOnlyList<T>> GetAllAsync(
-            Expression<Func<T, bool>>? predicate = null,
-            string? include = null)
+        public async Task<Pagination<T>> GetAllAsync(
+           Expression<Func<T, bool>>? predicate = null,
+           string? include = null,
+           int pageSize = 10,
+           int pageNumber = 1)
         {
             IQueryable<T> query = _dbSet.AsNoTracking();
 
@@ -63,7 +65,22 @@ namespace MyShop.DataAccess.Repositories
                 }
             }
 
-            return await query.ToListAsync();
+            var totalItems = await query.CountAsync();
+
+            pageSize = Math.Clamp(pageSize, 1, 10);
+
+            var items = await query
+                    .Skip(pageSize * (pageNumber - 1))
+                    .Take(pageSize)
+                    .ToListAsync();
+
+            return new Pagination<T>
+            {
+                Items = items,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalItems
+            };
         }
 
         public async Task AddAsync(T entity)
