@@ -1,157 +1,136 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var year = DateTime.Now.Year;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - myshop.Web</title>
+    <title>@(ViewData["Title"] is null ? "myShop" : ViewData["Title"] + " - myShop")</title>
+    <meta name="description" content="myShop — browse our product catalog." />
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/myshop.Web.styles.css" asp-append-version="true" />
-
-    <style>
-            body {
-                background: linear-gradient(135deg,#eef2f7 0%,#d9e4f5 40%,#c3dafe 100%);
-                margin: 0;
-                animation: fadeIn .8s ease;
-            }
-
-            @@keyframes fadeIn {
-                from {
-                    opacity: 0;
-                }
-
-                to {
-                    opacity: 1;
-                }
-            }
-
-            nav.navbar {
-                background: linear-gradient(90deg,#ffffff,#f8fbff) !important;
-                box-shadow: 0 6px 18px rgba(0,0,0,.08);
-                padding: 1rem 0;
-                animation: slideDown .8s ease;
-            }
-
-            @@keyframes slideDown {
-                from {
-                    transform: translateY(-35px);
-                    opacity: 0;
-                }
-
-                to {
-                    transform: translateY(0);
-                    opacity: 1;
-                }
-            }
-
-            .nav-link-box {
-                background: linear-gradient(135deg,#00c6ff,#0072ff);
-                color: white !important;
-                padding: .65rem 1.25rem;
-                margin-left: .75rem;
-                border-radius: 14px;
-                text-decoration: none;
-                font-weight: 600;
-                transition: .3s;
-                box-shadow: 0 4px 12px rgba(0,0,0,.15);
-            }
-
-                .nav-link-box:hover {
-                    transform: translateY(-3px);
-                    background: linear-gradient(135deg,#005bea,#00c6fb);
-                    box-shadow: 0 8px 18px rgba(0,0,0,.2);
-                }
-
-            .home-box {
-                font-size: 1.05rem;
-                padding: .9rem 1.6rem;
-            }
-
-            footer {
-                background: linear-gradient(90deg,#111,#1b1b1b);
-                color: white;
-                padding: 1.2rem 0;
-                border-top-left-radius: 18px;
-                border-top-right-radius: 18px;
-            }
-
-                footer a {
-                    color: white;
-                    text-decoration: none;
-                }
-
-                    footer a:hover {
-                        text-decoration: underline;
-                    }
-    </style>
 </head>
+<body class="app-store">
 
-<body class="d-flex flex-column min-vh-100">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light border-bottom">
-            <div class="container">
+    <header class="site-header">
+        <div class="container-app site-header__bar">
 
-                <a class="navbar-brand nav-link-box home-box"
-                   asp-controller="Home"
-                   asp-action="Index">
-                    MyShop.Web
-                </a>
+            <a class="site-brand" asp-controller="Home" asp-action="Index">
+                <span class="site-brand__mark" aria-hidden="true"><i class="fa-solid fa-bag-shopping"></i></span>
+                <span>myShop</span>
+            </a>
 
-                <button class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarContent">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+            <form class="site-search d-none d-lg-block" asp-controller="Shop" asp-action="Index" method="get" role="search">
+                <label for="site-search-input" class="visually-hidden-focusable">Search products</label>
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input id="site-search-input" type="search" name="searchTerm"
+                       value="@Context.Request.Query["searchTerm"]"
+                       placeholder="Search products..." autocomplete="off" />
+            </form>
 
-                <div class="collapse navbar-collapse" id="navbarContent">
+            <button class="site-header__toggle d-lg-none" type="button"
+                    aria-controls="site-nav-region" aria-expanded="false"
+                    data-nav-toggle>
+                <span class="visually-hidden-focusable">Toggle navigation</span>
+                <i class="fa-solid fa-bars" aria-hidden="true"></i>
+            </button>
 
-                    <ul class="navbar-nav ms-auto">
-
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-box"
-                               asp-controller="Product"
-                               asp-action="Index">
-                                Products
+            <div class="site-header__collapse d-lg-flex align-items-center ms-lg-3" id="site-nav-region">
+                <nav aria-label="Main navigation">
+                    <ul class="site-nav">
+                        <li>
+                            <a class="site-nav__link @(currentController == "Home" ? "is-active" : "")"
+                               asp-controller="Home" asp-action="Index">
+                                <i class="fa-solid fa-house" aria-hidden="true"></i> Home
                             </a>
                         </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-box"
-                               asp-controller="Category"
-                               asp-action="Index">
-                                Categories
+                        <li>
+                            <a class="site-nav__link @(currentController == "Shop" ? "is-active" : "")"
+                               asp-controller="Shop" asp-action="Index">
+                                <i class="fa-solid fa-store" aria-hidden="true"></i> Shop
                             </a>
                         </li>
-
                     </ul>
+                </nav>
 
+                <div class="site-header__actions">
+                    <form class="site-search d-lg-none w-100 mb-2" asp-controller="Shop" asp-action="Index" method="get" role="search">
+                        <label for="site-search-input-mobile" class="visually-hidden-focusable">Search products</label>
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        <input id="site-search-input-mobile" type="search" name="searchTerm"
+                               value="@Context.Request.Query["searchTerm"]"
+                               placeholder="Search products..." autocomplete="off" />
+                    </form>
                     <partial name="_LoginPartial" />
-
                 </div>
-
             </div>
-        </nav>
+
+        </div>
     </header>
 
-    <main class="container flex-grow-1 py-4">
-
-        <partial name="_Toaster" />
-
+    <main id="main-content" class="flex-grow-1">
         @RenderBody()
     </main>
 
-    <footer class="mt-auto">
-        <div class="container text-center">
-            &copy; @DateTime.Now.Year - myshop.Web
+    <footer class="site-footer">
+        <div class="container-app">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <a class="site-brand text-white mb-3" asp-controller="Home" asp-action="Index">
+                        <span class="site-brand__mark" aria-hidden="true"><i class="fa-solid fa-bag-shopping"></i></span>
+                        <span>myShop</span>
+                    </a>
+                    <p class="mb-0" style="max-width: 360px;">
+                        A modern storefront for browsing our product catalog across every category.
+                    </p>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <h2>Shop</h2>
+                    <ul>
+                        <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li><a asp-controller="Shop" asp-action="Index">All products</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-4">
+                    <h2>Account</h2>
+                    <ul>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            if (User.IsInRole("Admin"))
+                            {
+                                <li><a asp-controller="Product" asp-action="Index">Product management</a></li>
+                                <li><a asp-controller="Category" asp-action="Index">Category management</a></li>
+                            }
+                            <li><a asp-controller="User" asp-action="Index">My account</a></li>
+                        }
+                        else
+                        {
+                            <li><a asp-controller="Account" asp-action="Login">Login</a></li>
+                            <li><a asp-controller="Account" asp-action="Register">Create account</a></li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="site-footer__bottom">
+                <span>&copy; @year myShop. All rights reserved.</span>
+                <span>Asp.NET Core MVC &middot; EF Core &middot; Bootstrap</span>
+            </div>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <partial name="_Toaster" />
 
     @await RenderSectionAsync("Scripts", required: false)
 

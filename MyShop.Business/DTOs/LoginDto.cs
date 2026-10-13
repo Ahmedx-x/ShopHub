@@ -10,6 +10,6 @@ namespace MyShop.Business.DTOs
         [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; } = null!;
 
-        public bool RememberMe = false;
+        public bool RememberMe { get; set; } = false;
     }
 }

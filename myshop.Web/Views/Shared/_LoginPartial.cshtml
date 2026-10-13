@@ -2,63 +2,57 @@
 @using MyShop.Domain.Models
 @using System.Security.Claims
 @inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
 
-<style>
-    .nav-link-box {
-        display: inline-block;
-        padding: 0.6rem 1.2rem;
-        margin-left: 10px;
-        border-radius: 14px;
-        font-weight: 600;
-        color: #fff !important;
-        text-align: center;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-        background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
-        transition: 0.3s ease;
-    }
+@if (SignInManager.IsSignedIn(User))
+{
+    var fullName = User.FindFirstValue("FullName");
+    var displayName = string.IsNullOrWhiteSpace(fullName) ? User.Identity!.Name : fullName;
+    var initial = string.IsNullOrWhiteSpace(displayName) ? "U" : displayName.Trim()[..1].ToUpperInvariant();
+    var isAdmin = User.IsInRole("Admin");
 
-        .nav-link-box:hover {
-            background: linear-gradient(135deg, #005bea 0%, #00c6fb 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 22px rgba(0,0,0,0.25);
-        }
+    <div class="account-menu" data-account-menu>
+        <button type="button" class="account-menu__trigger" aria-haspopup="true" aria-expanded="false" data-account-menu-trigger>
+            <span class="account-menu__avatar" aria-hidden="true">@initial</span>
+            <span class="d-none d-sm-inline">@displayName</span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true" style="font-size:.7rem;"></i>
+        </button>
 
-        .nav-link-box.logout-btn {
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #ff6a00 0%, #ee0979 100%);
-            color: #fff !important;
-        }
+        <div class="account-menu__panel" data-account-menu-panel>
+            <div class="account-menu__header">
+                <span class="account-menu__name">@displayName</span>
+                <span class="account-menu__meta">@User.Identity!.Name</span>
+            </div>
 
-            .nav-link-box.logout-btn:hover {
-                background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
-                transform: translateY(-3px);
-                box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+            @if (isAdmin)
+            {
+                <a class="dropdown-item" asp-controller="Product" asp-action="Index">
+                    <i class="fa-solid fa-box-open me-2" aria-hidden="true"></i> Products
+                </a>
+                <a class="dropdown-item" asp-controller="Category" asp-action="Index">
+                    <i class="fa-solid fa-tags me-2" aria-hidden="true"></i> Categories
+                </a>
+                <a class="dropdown-item" asp-controller="User" asp-action="Index">
+                    <i class="fa-solid fa-users me-2" aria-hidden="true"></i> Users
+                </a>
             }
-</style>
+            else
+            {
+                <a class="dropdown-item" asp-controller="Shop" asp-action="Index">
+                    <i class="fa-solid fa-store me-2" aria-hidden="true"></i> Browse products
+                </a>
+            }
 
-<ul class="navbar-nav d-flex align-items-center">
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <li class="nav-item">
-            <span class="nav-link-box">Hello @User.FindFirstValue("FullName")!</span>
-        </li>
-        <li class="nav-item">
-            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+            <form asp-controller="Account" asp-action="Logout" method="post" class="mt-1">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="nav-link-box logout-btn border-0">
-                    Logout
+                <button type="submit" class="dropdown-item text-danger w-100 text-start border-0 bg-transparent">
+                    <i class="fa-solid fa-right-from-bracket me-2" aria-hidden="true"></i> Logout
                 </button>
             </form>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link-box" asp-controller="Account" asp-action="Register">Register</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link-box" asp-controller="Account" asp-action="Login">Login</a>
-        </li>
-    }
-</ul>
+        </div>
+    </div>
+}
+else
+{
+    <a class="btn btn-app-ghost" asp-controller="Account" asp-action="Login">Login</a>
+    <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Register</a>
+}

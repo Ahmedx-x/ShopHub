@@ -1,38 +1,31 @@
 ﻿@{
-    bool hasAnyToast = TempData["Create"] != null
-        || TempData["Update"] != null
-        || TempData["Delete"] != null
-        || TempData["Success"] != null
-        || TempData["Error"] != null;
+    var toasts = new List<object>();
+
+    if (TempData["Create"] is string create && !string.IsNullOrWhiteSpace(create))
+        toasts.Add(new { type = "success", message = create });
+
+    if (TempData["Update"] is string update && !string.IsNullOrWhiteSpace(update))
+        toasts.Add(new { type = "info", message = update });
+
+    if (TempData["Delete"] is string delete && !string.IsNullOrWhiteSpace(delete))
+        toasts.Add(new { type = "warning", message = delete });
+
+    if (TempData["Success"] is string success && !string.IsNullOrWhiteSpace(success))
+        toasts.Add(new { type = "success", message = success });
+
+    if (TempData["Error"] is string error && !string.IsNullOrWhiteSpace(error))
+        toasts.Add(new { type = "error", message = error });
 }
 
-@if (hasAnyToast)
+@if (toasts.Count > 0)
 {
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-
-    @if (TempData["Create"] != null)
-    {
-        <script>toastr.success("@Html.Raw(Json.Serialize(TempData["Create"]))")</script>
-    }
-
-    @if (TempData["Update"] != null)
-    {
-        <script>toastr.info("@Html.Raw(Json.Serialize(TempData["Update"]))")</script>
-    }
-
-    @if (TempData["Delete"] != null)
-    {
-        <script>toastr.warning("@Html.Raw(Json.Serialize(TempData["Delete"]))")</script>
-    }
-
-    @if (TempData["Success"] != null)
-    {
-        <script>toastr.success("@Html.Raw(Json.Serialize(TempData["Success"]))")</script>
-    }
-
-    @if (TempData["Error"] != null)
-    {
-        <script>toastr.error("@Html.Raw(Json.Serialize(TempData["Error"]))")</script>
-    }
+    <script>
+        (function () {
+            if (typeof toastr === "undefined") { return; }
+            var messages = @Html.Raw(Json.Serialize(toasts));
+            messages.forEach(function (item) {
+                toastr[item.type](item.message);
+            });
+        })();
+    </script>
 }

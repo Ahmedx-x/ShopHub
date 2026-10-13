@@ -1,0 +1,38 @@
+@model Product
+
+<article class="product-card">
+    <a class="product-card__media" asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id"
+       aria-label="View @Model.Name">
+        @if (!string.IsNullOrWhiteSpace(Model.Img))
+        {
+            <img src="~/@Model.Img" alt="" loading="lazy" />
+        }
+        else
+        {
+            <span class="product-card__placeholder" aria-hidden="true"><i class="fa-solid fa-image"></i></span>
+        }
+    </a>
+
+    <div class="product-card__body">
+        @if (Model.Category is not null)
+        {
+            <span class="product-card__category">@Model.Category.Name</span>
+        }
+
+        <h3 class="product-card__title">
+            <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id">@Model.Name</a>
+        </h3>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <p class="product-card__desc">@Model.Description</p>
+        }
+
+        <div class="product-card__foot">
+            <span class="price">$@Model.Price.ToString("N2")</span>
+            <a class="btn btn-sm btn-outline-primary" asp-controller="Shop" asp-action="Details" asp-route-id="@Model.Id">
+                View
+            </a>
+        </div>
+    </div>
+</article>

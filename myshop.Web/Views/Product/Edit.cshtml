@@ -2,187 +2,86 @@
 @model ProductVM
 
 @{
-    ViewBag.PageTitle = "Product Management";
-    ViewBag.CardTitle = "Edit Product";
+    ViewBag.PageTitle = "Edit product";
+    ViewBag.PageSubtitle = "Update the details of an existing product.";
     Layout = "~/Views/Shared/_Dashboard.cshtml";
 }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+@section PageActions {
+    <a asp-controller="Product" asp-action="Index" class="btn btn-app-ghost">
+        <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i> Back to products
+    </a>
+}
 
-<style>
-    /* Card */
-    .custom-card {
-        background: #ffffff;
-        border-radius: 14px;
-        border: 1px solid #d0d7de;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-        padding: 24px;
-        margin-bottom: 20px;
-    }
+<div class="card admin-form-card">
+    <div class="card-body">
+        <form asp-controller="Product" asp-action="Edit" method="post" enctype="multipart/form-data" novalidate>
+            <input type="hidden" asp-for="Product.Id" />
+            <input type="hidden" asp-for="Product.Img" />
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
 
-    .custom-card-header {
-        background: #f1f5fb;
-        border-bottom: 1px solid #d0d7de;
-        padding: 18px 0;
-        text-align: center;
-        border-radius: 14px 14px 0 0;
-        margin-bottom: 20px;
-    }
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <p class="form-section-title">Product details</p>
 
-        .custom-card-header h4 {
-            color: #1e3a8a; /* أزرق فخم */
-            font-weight: 700;
-            margin: 0;
-        }
+                    <div class="mb-3">
+                        <label asp-for="Product.Name" class="form-label"></label>
+                        <input asp-for="Product.Name" class="form-control" />
+                        <span asp-validation-for="Product.Name" class="text-danger"></span>
+                    </div>
 
-    .form-control, textarea, select {
-        background-color: #fefefe;
-        border: 1px solid #a0aec0;
-        border-radius: 8px;
-        padding: 10px 14px;
-        transition: 0.25s ease;
-        color: #1e3a8a;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
+                    <div class="mb-3">
+                        <label asp-for="Product.Description" class="form-label"></label>
+                        <textarea asp-for="Product.Description" rows="4" class="form-control"></textarea>
+                        <span asp-validation-for="Product.Description" class="text-danger"></span>
+                    </div>
 
-        .form-control::placeholder, select::placeholder {
-            color: #7f9cf5;
-        }
+                    <div class="row">
+                        <div class="col-sm-6 mb-3">
+                            <label asp-for="Product.Price" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Product.Price" type="number" step="0.01" min="0" class="form-control" />
+                            </div>
+                            <span asp-validation-for="Product.Price" class="text-danger"></span>
+                        </div>
 
-        .form-control:focus, textarea:focus, select:focus {
-            border-color: #1e40af;
-            box-shadow: 0 0 0 0.2rem rgba(59,130,246,0.25);
-        }
+                        <div class="col-sm-6 mb-3">
+                            <label asp-for="Product.CategoryId" class="form-label"></label>
+                            <select asp-for="Product.CategoryId" class="form-select"
+                                    asp-items="@(new SelectList(Model.CategoryList, "Id", "Name"))">
+                                <option value="">-- Select category --</option>
+                            </select>
+                            <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
 
-    .form-label {
-        font-weight: 600;
-        margin-bottom: 6px;
-        color: #1e3a8a;
-    }
+                <div class="col-lg-5">
+                    <p class="form-section-title">Product image</p>
+                    <label asp-for="Product.Img" class="form-label">Replace image</label>
+                    <input type="file" name="file" class="form-control" accept=".jpg,.jpeg,.png,.webp"
+                           data-image-preview="ImagePreview" />
+                    <p class="form-text">Leave empty to keep the current image. JPG, PNG or WEBP, max 2 MB.</p>
 
-    .btn-success {
-        padding: 10px 22px;
-        font-weight: 600;
-        border-radius: 8px;
-        background-color: #16a34a;
-        color: white;
-        border: none;
-        box-shadow: 0 4px 12px rgba(22,163,74,0.3);
-    }
-
-        .btn-success:hover {
-            background-color: #15803d;
-            box-shadow: 0 6px 15px rgba(22,163,74,0.4);
-        }
-
-    .btn-outline-secondary {
-        border-radius: 8px;
-        padding: 9px 18px;
-        border-color: #93c5fd; /* أزرق فاتح */
-        font-weight: 600;
-        color: #1e3a8a;
-    }
-
-        .btn-outline-secondary:hover {
-            background-color: #bfdbfe;
-            color: #1e40af;
-        }
-
-    #ImagePreview {
-        width: 300px;
-        height: 300px;
-        object-fit: contain;
-        border: 1px solid #d0d7de;
-        border-radius: 8px;
-        padding: 4px;
-    }
-</style>
-
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="custom-card">
-
-            <div class="custom-card-header">
-                <h4><i class="fa-solid fa-box-pen me-2"></i> @ViewBag.CardTitle</h4>
+                    <div class="mt-3 text-center">
+                        <img id="ImagePreview" class="image-preview"
+                             src="@(!string.IsNullOrWhiteSpace(Model.Product.Img) ? Url.Content("~/" + Model.Product.Img) : "")"
+                             alt="Current product image" />
+                    </div>
+                </div>
             </div>
 
-            <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                <input type="hidden" asp-for="Product.Id" />
-                <input type="hidden" asp-for="Product.Img" />
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                <div class="mb-3">
-                    <label asp-for="Product.Name" class="form-label">
-                        <i class="fa-solid fa-tag me-1"></i> Product Name
-                    </label>
-                    <input asp-for="Product.Name" class="form-control" placeholder="Enter product name..." />
-                    <span asp-validation-for="Product.Name" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Product.Description" class="form-label">
-                        <i class="fa-solid fa-align-left me-1"></i> Description
-                    </label>
-                    <textarea asp-for="Product.Description" rows="4" class="form-control" placeholder="Enter description..."></textarea>
-                    <span asp-validation-for="Product.Description" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Product.Price" class="form-label">
-                        <i class="fa-solid fa-dollar-sign me-1"></i> Price
-                    </label>
-                    <input asp-for="Product.Price" class="form-control" placeholder="Enter price..." />
-                    <span asp-validation-for="Product.Price" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Product.Img" class="form-label">
-                        <i class="fa-solid fa-image me-1"></i> Product Image
-                    </label>
-                    <input type="file" name="file" id="imgfile" class="form-control" onchange="fillimg(event);" />
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Product.CategoryId" class="form-label">
-                        <i class="fa-solid fa-list me-1"></i> Category
-                    </label>
-                    <select asp-for="Product.CategoryId"
-                            class="form-control"
-                            asp-items="@(Model.CategoryList.Select(c => new SelectListItem
-                            {
-                                Value = c.Id.ToString(),
-                                Text = c.Name
-                            }))">
-                        <option disabled selected>-- Select Category --</option>
-                    </select>
-                    <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center">
-                    <a asp-action="Index" class="btn btn-outline-secondary">
-                        <i class="fa-solid fa-arrow-left me-1"></i> Back
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
-                    </button>
-                </div>
-            </form>
-
-            <div class="mt-4 text-center">
-                <img id="ImagePreview" src="~/@Model.Product.Img" />
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a asp-controller="Product" asp-action="Index" class="btn btn-app-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-floppy-disk me-1" aria-hidden="true"></i> Save changes
+                </button>
             </div>
-
-        </div>
+        </form>
     </div>
 </div>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
-
-    <script>
-        var fillimg = function(event){
-            var imgholder = document.getElementById("ImagePreview");
-            imgholder.src = URL.createObjectURL(event.target.files[0]);
-        }
-    </script>
 }

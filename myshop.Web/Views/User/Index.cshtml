@@ -1,0 +1,158 @@
+@using System.Security.Claims
+@model IReadOnlyList<UserDto>
+
+@{
+    ViewBag.PageTitle = "Users";
+    ViewBag.PageSubtitle = "Manage roles and account access for every registered user.";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="card-title mb-0">All users</h2>
+        <span class="badge-app badge-app--muted">@Model.Count total</span>
+    </div>
+    <div class="card-body">
+        @if (Model.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">User</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            var isSelf = user.Id == currentUserId;
+                            var isAdmin = string.Equals(user.Role, "Admin", StringComparison.OrdinalIgnoreCase);
+                            var initial = string.IsNullOrWhiteSpace(user.FullName)
+                                ? "?" : user.FullName.Substring(0, 1).ToUpperInvariant();
+
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="avatar" aria-hidden="true">@initial</span>
+                                        <div>
+                                            <div class="fw-semibold">
+                                                @user.FullName
+                                                @if (isSelf)
+                                                {
+                                                    <span class="badge-app badge-app--info ms-1">You</span>
+                                                }
+                                            </div>
+                                            <div class="text-muted-app small">@user.UserName</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-app @(isAdmin ? "badge-app--primary" : "badge-app--muted")">
+                                        @user.Role
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (user.LockStatus)
+                                    {
+                                        <span class="badge-app badge-app--danger">
+                                            <i class="fa-solid fa-lock me-1" aria-hidden="true"></i> Locked
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-app badge-app--success">
+                                            <i class="fa-solid fa-circle-check me-1" aria-hidden="true"></i> Active
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="action-group justify-content-end">
+                                        @if (isSelf)
+                                        {
+                                            <span class="text-muted-app small">Current account</span>
+                                        }
+                                        else
+                                        {
+                                            if (isAdmin)
+                                            {
+                                                <form asp-controller="User" asp-action="DemoteToCustomer" method="post"
+                                                      data-confirm="This user will lose administrator rights."
+                                                      data-confirm-title="Demote to customer?"
+                                                      data-confirm-button="Demote">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fa-solid fa-arrow-down me-1" aria-hidden="true"></i> Demote
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="User" asp-action="PromoteToAdmin" method="post"
+                                                      data-confirm="This user will gain full administrator rights."
+                                                      data-confirm-title="Promote to admin?"
+                                                      data-confirm-button="Promote">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fa-solid fa-arrow-up me-1" aria-hidden="true"></i> Promote
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            @if (user.LockStatus)
+                                            {
+                                                <form asp-controller="User" asp-action="UnLockAccount" method="post"
+                                                      data-confirm="This user will be able to sign in again."
+                                                      data-confirm-title="Unlock account?"
+                                                      data-confirm-button="Unlock">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" aria-label="Unlock account">
+                                                        <i class="fa-solid fa-unlock" aria-hidden="true"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="User" asp-action="LockAccount" method="post"
+                                                      data-confirm="This user will no longer be able to sign in."
+                                                      data-confirm-title="Lock account?"
+                                                      data-confirm-button="Lock">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary" aria-label="Lock account">
+                                                        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            <form asp-controller="User" asp-action="DeleteUser" method="post"
+                                                  data-confirm="The account will be permanently deleted. This cannot be undone."
+                                                  data-confirm-title="Delete this user?"
+                                                  data-confirm-button="Delete user">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Delete user">
+                                                    <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-state__icon" aria-hidden="true"><i class="fa-solid fa-users"></i></div>
+                <h3>No users found</h3>
+                <p>There are no registered users to manage yet.</p>
+            </div>
+        }
+    </div>
+</div>

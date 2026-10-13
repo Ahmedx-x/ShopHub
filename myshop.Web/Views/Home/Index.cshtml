@@ -1,8 +1,90 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model HomeVM
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome TO VS</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-app">
+    <section class="hero" aria-labelledby="hero-title">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <h1 id="hero-title">Discover products you'll love</h1>
+                <p class="mb-4">
+                    Browse our full catalog of products across every category, with clear pricing
+                    and easy navigation.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-light btn-lg" asp-controller="Shop" asp-action="Index">
+                        <i class="fa-solid fa-store me-2" aria-hidden="true"></i> Shop the catalog
+                    </a>
+                    @if (User.Identity?.IsAuthenticated != true)
+                    {
+                        <a class="btn btn-outline-light btn-lg" asp-controller="Account" asp-action="Register">
+                            Create an account
+                        </a>
+                    }
+                </div>
+
+                <div class="hero__stats">
+                    <div class="hero__stat">
+                        <strong>@Model.ProductCount</strong>
+                        <span>@(Model.ProductCount == 1 ? "Product" : "Products")</span>
+                    </div>
+                    <div class="hero__stat">
+                        <strong>@Model.CategoryCount</strong>
+                        <span>@(Model.CategoryCount == 1 ? "Category" : "Categories")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@if (Model.Categories.Count > 0)
+{
+    <div class="container-app section pb-0">
+        <div class="section__head">
+            <div>
+                <h2 class="section__title">Shop by category</h2>
+                <p class="section__subtitle">Jump straight to the products you're looking for.</p>
+            </div>
+        </div>
+        <div class="chip-row">
+            @foreach (var category in Model.Categories)
+            {
+                <a class="chip" asp-controller="Shop" asp-action="Index" asp-route-categoryId="@category.Id">
+                    <i class="fa-solid fa-tag" aria-hidden="true"></i> @category.Name
+                </a>
+            }
+        </div>
+    </div>
+}
+
+<div class="container-app section">
+    <div class="section__head">
+        <div>
+            <h2 class="section__title">Our products</h2>
+            <p class="section__subtitle">A selection from across the catalog.</p>
+        </div>
+        <a class="btn btn-outline-primary" asp-controller="Shop" asp-action="Index">
+            View all <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true"></i>
+        </a>
+    </div>
+
+    @if (Model.Products.Count > 0)
+    {
+        <div class="product-grid">
+            @foreach (var product in Model.Products)
+            {
+                <partial name="_ProductCard" model="product" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state__icon" aria-hidden="true"><i class="fa-solid fa-box-open"></i></div>
+            <h3>No products yet</h3>
+            <p>The catalog is currently empty. Please check back soon.</p>
+        </div>
+    }
 </div>

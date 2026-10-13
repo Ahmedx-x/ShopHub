@@ -1,144 +1,100 @@
-﻿@using MyShop.Domain.Models
-@model IEnumerable<Category>
+﻿@model Pagination<Category>
 
 @{
-    ViewBag.PageTitle = "Category Management";
-    ViewBag.CardTitle = "View Categories";
+    ViewBag.PageTitle = "Categories";
+    ViewBag.PageSubtitle = "Organize your catalog into categories.";
+    Layout = "~/Views/Shared/_Dashboard.cshtml";
+
+    var windowStart = Math.Max(1, Model.PageNumber - 2);
+    var windowEnd = Math.Min(Model.TotalPages, Model.PageNumber + 2);
 }
 
-<!-- Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+@section PageActions {
+    <a asp-controller="Category" asp-action="Create" class="btn btn-primary">
+        <i class="fa-solid fa-circle-plus me-1" aria-hidden="true"></i> Create category
+    </a>
+}
 
-<style>
-    /* Card */
-    .custom-card {
-        background: #ffffff;
-        border-radius: 14px;
-        border: 1px solid #d0d7de;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
-        padding: 20px;
-    }
-
-    .custom-card-header {
-        background: #f1f5fb;
-        border-bottom: 1px solid #d0d7de;
-        padding: 18px 0;
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-        .custom-card-header h4 {
-            color: #1e3a8a;
-            font-weight: 700;
-            margin: 0;
-        }
-
-    .table-custom {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0 10px;
-    }
-
-        .table-custom th {
-            background-color: #1e40af;
-            color: white;
-            font-weight: 600;
-            padding: 12px;
-            border-radius: 8px 8px 0 0;
-        }
-
-        .table-custom td {
-            background-color: #fefefe;
-            padding: 12px;
-            color: #1e3a8a;
-            vertical-align: middle;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table-custom tr:hover td {
-            background-color: #e0ebff;
-            transition: 0.2s;
-        }
-
-    .btn-primary {
-        padding: 8px 18px;
-        border-radius: 8px;
-        font-weight: 600;
-        background-color: #1e40af;
-        color: white;
-        border: none;
-    }
-
-    .btn-success {
-        padding: 6px 14px;
-        border-radius: 8px;
-        background-color: #16a34a;
-        color: white;
-        border: none;
-    }
-
-    .btn-danger {
-        padding: 6px 14px;
-        border-radius: 8px;
-        background-color: #dc2626;
-        color: white;
-        border: none;
-    }
-
-    .top-btn {
-        margin-bottom: 15px;
-    }
-</style>
-
-<div class="custom-card">
-
-    <div class="custom-card-header">
-        <h4><i class="fa-solid fa-folder-open me-2"></i> @ViewBag.CardTitle</h4>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="card-title mb-0">All categories</h2>
+        <span class="badge-app badge-app--muted">@Model.TotalItems total</span>
     </div>
+    <div class="card-body">
+        @if (Model.Items.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Date created</th>
+                            <th scope="col" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@item.Name</td>
+                                <td><div class="clamp-2 text-muted-app">@item.Description</div></td>
+                                <td>@item.CreatedTime.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <div class="action-group justify-content-end">
+                                        <a asp-controller="Category" asp-action="Edit" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-primary" aria-label="Edit @item.Name">
+                                            <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                                        </a>
+                                        <a asp-controller="Category" asp-action="Delete" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-danger" aria-label="Delete @item.Name">
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
 
-    <div class="top-btn">
-        <a asp-controller="Category"
-           asp-action="Create"
-           class="btn btn-primary">
-            <i class="fa-solid fa-circle-plus me-1"></i> Create Category
-        </a>
-    </div>
-
-    <table class="table-custom">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Date Created</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach (var item in Model)
+            @if (Model.TotalPages > 1)
             {
-                <tr>
-                    <td>@item.Name</td>
-                    <td>@Html.Raw(item.Description)</td>
-                    <td>@item.CreatedTime.ToString("dd MMM yyyy")</td>
-                    <td>
-                        <a asp-controller="Category"
-                           asp-action="Edit"
-                           asp-route-id="@item.Id"
-                           class="btn btn-success me-1">
-                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                <nav class="pagination-app justify-content-center justify-content-md-end" aria-label="Category pagination">
+                    @if (Model.PageNumber > 1)
+                    {
+                        <a asp-action="Index" asp-route-pageNumber="@(Model.PageNumber - 1)" aria-label="Previous page">
+                            <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
                         </a>
-
-                        <a asp-controller="Category"
-                           asp-action="Delete"
-                           asp-route-id="@item.Id"
-                           class="btn btn-danger">
-                            <i class="fa-solid fa-trash"></i> Delete
+                    }
+                    @for (var i = windowStart; i <= windowEnd; i++)
+                    {
+                        if (i == Model.PageNumber)
+                        {
+                            <span class="is-active" aria-current="page">@i</span>
+                        }
+                        else
+                        {
+                            <a asp-action="Index" asp-route-pageNumber="@i">@i</a>
+                        }
+                    }
+                    @if (Model.PageNumber < Model.TotalPages)
+                    {
+                        <a asp-action="Index" asp-route-pageNumber="@(Model.PageNumber + 1)" aria-label="Next page">
+                            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
                         </a>
-                    </td>
-                </tr>
+                    }
+                </nav>
             }
-        </tbody>
-    </table>
-
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-state__icon" aria-hidden="true"><i class="fa-solid fa-folder-open"></i></div>
+                <h3>No categories yet</h3>
+                <p>Create your first category to start organizing products.</p>
+                <a asp-controller="Category" asp-action="Create" class="btn btn-primary">Create category</a>
+            </div>
+        }
+    </div>
 </div>

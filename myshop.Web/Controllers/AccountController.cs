@@ -14,13 +14,13 @@ namespace MyShop.Web.Controllers
             _accountService = accountService;
         }
 
-        [HttpGet("login")]
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
         }
 
-        [HttpPost("login")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginDto dto)
         {
@@ -40,7 +40,7 @@ namespace MyShop.Web.Controllers
             return View(dto);
         }
 
-        [HttpPost("logout")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
@@ -48,13 +48,13 @@ namespace MyShop.Web.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        [HttpGet("register")]
+        [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        [HttpPost("register")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterDto dto)
         {

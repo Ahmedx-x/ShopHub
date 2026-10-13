@@ -33,6 +33,21 @@ namespace myshop.Web.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> GetData(string? searchTerm, int pageSize = 10, int pageNumber = 1)
         {
+            // Support DataTables server-side processing parameters while keeping the
+            // original pageSize/pageNumber/searchTerm contract for other callers.
+            var draw = Request.Query["draw"].FirstOrDefault();
+
+            if (int.TryParse(Request.Query["length"], out var length) && length > 0 &&
+                int.TryParse(Request.Query["start"], out var start) && start >= 0)
+            {
+                pageSize = length;
+                pageNumber = (start / length) + 1;
+            }
+
+            var dataTablesSearch = Request.Query["search[value]"].FirstOrDefault();
+            if (!string.IsNullOrWhiteSpace(dataTablesSearch))
+                searchTerm = dataTablesSearch;
+
             Pagination<Product> result;
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -45,6 +60,9 @@ namespace myshop.Web.Areas.Admin.Controllers
             var productsDto = _mapper.Map<IReadOnlyList<ProductDto>>(result.Items);
             return Json(new
             {
+                draw = draw ?? "1",
+                recordsTotal = result.TotalItems,
+                recordsFiltered = result.TotalItems,
                 data = productsDto,
             });
         }
@@ -83,7 +101,10 @@ namespace myshop.Web.Areas.Admin.Controllers
 
                 return RedirectToAction("Index");
             }
-            return View(productVM.Product);
+
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            productVM.CategoryList = _mapper.Map<IEnumerable<CategoryDto>>(categories.Items);
+            return View(productVM);
         }
 
         [HttpGet]
@@ -98,7 +119,7 @@ namespace myshop.Web.Areas.Admin.Controllers
                 return NotFound();
 
             var catigories = await _unitOfWork.Categories.GetAllAsync();
-            var list = _mapper.Map<IEnumerable<CategoryDto>>(catigories);
+            var list = _mapper.Map<IEnumerable<CategoryDto>>(catigories.Items);
 
             ProductVM productVM = new ProductVM
             {
@@ -136,7 +157,9 @@ namespace myshop.Web.Areas.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            return View(productVM.Product);
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            productVM.CategoryList = _mapper.Map<IEnumerable<CategoryDto>>(categories.Items);
+            return View(productVM);
         }
 
         [HttpDelete]

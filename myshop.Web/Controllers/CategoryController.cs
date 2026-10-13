@@ -14,9 +14,12 @@ namespace myshop.Web.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageNumber = 1)
         {
-            var categories = await _unitOfWork.Categories.GetAllAsync();
+            if (pageNumber < 1)
+                pageNumber = 1;
+
+            var categories = await _unitOfWork.Categories.GetAllAsync(pageSize: 10, pageNumber: pageNumber);
             return View(categories);
         }
 

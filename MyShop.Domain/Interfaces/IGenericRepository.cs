@@ -8,7 +8,7 @@ namespace MyShop.Domain.Interfaces
         Task<Pagination<T>> GetAllAsync(
             Expression<Func<T, bool>>? predicate = null,
             string? include = null,
-            int pageSize = 0,
+            int pageSize = 10,
             int pageNumber = 1);
         Task<T?> GetByIdAsync(int id);
         Task<T?> FindAsync(

@@ -1,0 +1,123 @@
+@model ShopVM
+@{
+    var isSearching = !string.IsNullOrWhiteSpace(Model.SearchTerm);
+    var products = Model.Products;
+    var heading = isSearching
+        ? $"Results for \u201c{Model.SearchTerm}\u201d"
+        : (Model.CategoryName ?? "All products");
+
+    ViewData["Title"] = heading;
+
+    var hasPages = products.TotalPages > 1;
+    var windowStart = Math.Max(1, products.PageNumber - 2);
+    var windowEnd = Math.Min(products.TotalPages, products.PageNumber + 2);
+}
+
+<div class="container-app section">
+    <div class="section__head">
+        <div>
+            <h1 class="section__title">@heading</h1>
+            <p class="section__subtitle">
+                @products.TotalItems @(products.TotalItems == 1 ? "product" : "products") found
+            </p>
+        </div>
+        <a class="btn btn-app-ghost btn-sm" asp-controller="Home" asp-action="Index">
+            <i class="fa-solid fa-house me-1" aria-hidden="true"></i> Home
+        </a>
+    </div>
+
+    @if (!isSearching && Model.Categories.Count > 0)
+    {
+        <div class="chip-row mb-4">
+            <a class="chip @(Model.CategoryId is null ? "is-active" : "")"
+               asp-controller="Shop" asp-action="Index">
+                All
+            </a>
+            @foreach (var category in Model.Categories)
+            {
+                <a class="chip @(Model.CategoryId == category.Id ? "is-active" : "")"
+                   asp-controller="Shop" asp-action="Index" asp-route-categoryId="@category.Id">
+                    @category.Name
+                </a>
+            }
+        </div>
+    }
+
+    @if (products.Items.Count > 0)
+    {
+        <div class="product-grid">
+            @foreach (var product in products.Items)
+            {
+                <partial name="_ProductCard" model="product" />
+            }
+        </div>
+
+        @if (hasPages)
+        {
+            <nav class="pagination-app" aria-label="Product pagination">
+                @if (products.PageNumber > 1)
+                {
+                    <a asp-controller="Shop" asp-action="Index"
+                       asp-route-searchTerm="@Model.SearchTerm"
+                       asp-route-categoryId="@Model.CategoryId"
+                       asp-route-pageNumber="@(products.PageNumber - 1)"
+                       aria-label="Previous page">
+                        <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="is-disabled" aria-hidden="true"><i class="fa-solid fa-chevron-left"></i></span>
+                }
+
+                @for (var i = windowStart; i <= windowEnd; i++)
+                {
+                    if (i == products.PageNumber)
+                    {
+                        <span class="is-active" aria-current="page">@i</span>
+                    }
+                    else
+                    {
+                        <a asp-controller="Shop" asp-action="Index"
+                           asp-route-searchTerm="@Model.SearchTerm"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-pageNumber="@i">@i</a>
+                    }
+                }
+
+                @if (products.PageNumber < products.TotalPages)
+                {
+                    <a asp-controller="Shop" asp-action="Index"
+                       asp-route-searchTerm="@Model.SearchTerm"
+                       asp-route-categoryId="@Model.CategoryId"
+                       asp-route-pageNumber="@(products.PageNumber + 1)"
+                       aria-label="Next page">
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                }
+                else
+                {
+                    <span class="is-disabled" aria-hidden="true"><i class="fa-solid fa-chevron-right"></i></span>
+                }
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state__icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></div>
+            @if (isSearching)
+            {
+                <h3>No products match your search</h3>
+                <p>Try a different keyword or browse the full catalog.</p>
+                <a class="btn btn-primary" asp-controller="Shop" asp-action="Index">Browse all products</a>
+            }
+            else
+            {
+                <h3>No products in this category</h3>
+                <p>This category doesn't have any products yet.</p>
+                <a class="btn btn-primary" asp-controller="Shop" asp-action="Index">Browse all products</a>
+            }
+        </div>
+    }
+</div>
